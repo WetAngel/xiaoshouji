@@ -3,7 +3,7 @@
 // PIN 激活逻辑、城市搜索、更新检查
 // 从 init-and-state.js 拆分
 // ============================================================
-
+localStorage.setItem('ephonePinActivated', 'true');
 document.addEventListener('DOMContentLoaded', () => {
 
   async function searchCityGeo(cityName) {
@@ -94,98 +94,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   function requirePinActivation() {
-
-    return new Promise(async (resolve, reject) => {
-
-      if (isPinActivated) {
-        resolve(true);
-        return;
-      }
-
-
-      const modal = document.getElementById('pin-modal-overlay');
-      const deviceIdDisplay = document.getElementById('pin-device-id-display');
-      const pinInput = document.getElementById('pin-input');
-      const confirmBtn = document.getElementById('pin-modal-confirm-btn');
-      const cancelBtn = document.getElementById('pin-modal-cancel-btn');
-
-
-      deviceIdDisplay.value = EPHONE_DEVICE_ID;
-      pinInput.value = '';
-
-
-
-      const onConfirmClick = async () => {
-        const userPin = pinInput.value;
-
-
-        modal.classList.remove('visible');
-
-
-        confirmBtn.removeEventListener('click', onConfirmClick);
-        cancelBtn.removeEventListener('click', onCancelClick);
-
-        if (!userPin || !userPin.trim()) {
-          await showCustomAlert('操作取消', '您没有输入激活码。');
-          reject(new Error('用户取消了输入。'));
-          return;
-        }
-
-
-        await showCustomAlert("请稍候...", "正在验证激活码...");
-
-
-        try {
-
-          const correctPin = await generatePin(EPHONE_DEVICE_ID, PREFILLED_SALT);
-
-
-          if (userPin.trim().toUpperCase() === correctPin) {
-
-            localStorage.setItem('ephonePinActivated', 'true');
-            isPinActivated = true;
-            await showCustomAlert('激活成功！', '此功能已为您的设备永久解锁。');
-
-
-            updateLockedFeatureUI();
-
-
-            resolve(true);
-          } else {
-
-            await showCustomAlert('激活失败', '您输入的激活码不正确。');
-            reject(new Error('激活码不正确。'));
-          }
-        } catch (error) {
-
-          console.error("本地PIN码验证过程出错:", error);
-          await showCustomAlert('激活失败', `验证过程中发生错误：${error.message}`);
-          reject(error);
-        }
-
-      };
-
-
-      const onCancelClick = async () => { // <--- 添加 async
-        modal.classList.remove('visible');
-
-        confirmBtn.removeEventListener('click', onConfirmClick);
-        cancelBtn.removeEventListener('click', onCancelClick);
-
-
-        await showCustomAlert('操作取消', '激活流程已取消。');
-        reject(new Error('用户取消了激活。'));
-      };
-
-
-      confirmBtn.addEventListener('click', onConfirmClick);
-      cancelBtn.addEventListener('click', onCancelClick);
-
-
-      modal.classList.add('visible');
-      pinInput.focus();
-    });
-  }
+    return Promise.resolve(true);
+}
+window.requirePinActivation = requirePinActivation;
 
   window.requirePinActivation = requirePinActivation;
 
